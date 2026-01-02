@@ -1,0 +1,30 @@
+"""Command-line interface for LLM drift detection framework."""
+
+from ingestion.data_loader import load_dataset
+from core.schema_profiler import profile_schema
+from core.distribution_profiler import profile_distribution
+from core.pattern_profiler import profile_patterns
+from core.drift_reasoner import reason_overall_drift
+from report.report_generator import generate_report
+
+
+def main():
+    """Main CLI entry point."""
+    ref = load_dataset("data/reference_data.csv")
+    cur = load_dataset("data/new_data_with_drift.csv")
+
+    schema = profile_schema(ref, "reference_data.csv")
+    dist = profile_distribution(ref, cur, "reference_data.csv")
+    pattern = profile_patterns(ref, cur, "reference_data.csv")
+
+    summary = reason_overall_drift(
+        [d.model_dump() for d in dist + pattern],
+        "reference_data.csv"
+    )
+
+    generate_report(schema, dist, pattern, summary, "drift_report.json")
+
+
+if __name__ == "__main__":
+    main()
+
