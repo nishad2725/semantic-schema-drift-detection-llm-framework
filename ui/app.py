@@ -42,7 +42,7 @@ st.sidebar.header("📂 Data Sources")
 sources = set()
 
 # Collect all sources from the report
-for section in ["schema_profile", "distribution_drift", "pattern_drift", "overall_summary"]:
+for section in ["schema_profile", "column_drift", "distribution_drift", "pattern_drift", "overall_summary"]:
     section_data = report.get(section, [])
     if isinstance(section_data, list):
         for item in section_data:
@@ -83,6 +83,54 @@ if report.get("schema_profile"):
     )
 else:
     st.warning("No schema profile data available.")
+
+# ---------- Column Drift ----------
+st.header("📋 Column Drift Detection")
+
+column_drift = report.get("column_drift", {})
+
+if column_drift:
+    drift_detected = column_drift.get("drift_detected", False)
+    severity = column_drift.get("severity", "Unknown")
+    affected_cols = column_drift.get("affected_columns", [])
+    
+    # Color code based on severity
+    if severity.lower() == "high":
+        severity_color = "🔴"
+    elif severity.lower() == "medium":
+        severity_color = "🟡"
+    else:
+        severity_color = "🟢"
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Drift Detected", "Yes" if drift_detected else "No")
+    with col2:
+        st.metric("Severity", severity)
+    
+    if affected_cols:
+        st.markdown("**Affected Columns:**")
+        # Separate added and removed columns if possible
+        # For now, just show all affected columns
+        cols_display = ", ".join([f"`{col}`" for col in affected_cols])
+        st.markdown(cols_display)
+    
+    st.markdown("**AI Explanation:**")
+    
+    # Color code the explanation box
+    if drift_detected:
+        if severity.lower() == "high":
+            st.error(column_drift.get("explanation", "No explanation available."))
+        elif severity.lower() == "medium":
+            st.warning(column_drift.get("explanation", "No explanation available."))
+        else:
+            st.info(column_drift.get("explanation", "No explanation available."))
+    else:
+        st.success(column_drift.get("explanation", "No explanation available."))
+    
+    st.markdown(f"**Source Citation:** `[{column_drift.get('source', 'Unknown')}]`")
+else:
+    st.success("✅ No column drift detected.")
 
 # ---------- Distribution Drift ----------
 st.header("📊 Distribution Drift Detection")
@@ -214,4 +262,3 @@ with st.expander("ℹ️ About This UI"):
     **Note:** This UI is intentionally minimal. Its goal is to visualize AI-generated drift 
     insights and citations, not to replace a production dashboard.
     """)
-
