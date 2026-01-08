@@ -10,17 +10,18 @@ from report.report_generator import generate_report
 
 def main():
     """Main CLI entry point."""
-    ref = load_dataset("data/reference_data.csv")
-    cur = load_dataset("data/new_data_with_drift.csv")
+    ref = load_dataset("data/reference_data_tc4.csv")
+    cur = load_dataset("data/new_data_with_drift_tc4.csv")
 
-    schema = profile_schema(ref, "reference_data.csv")
-    column_drift = detect_column_drift(ref, cur, "reference_data.csv", "new_data_with_drift.csv")
-    dist = profile_distribution(ref, cur, "reference_data.csv")
-    pattern = profile_patterns(ref, cur, "reference_data.csv")
+    schema = profile_schema(ref, "reference_data_tc4.csv")
+    column_drift = detect_column_drift(ref, cur, "reference_data_tc4.csv", "new_data_with_drift_tc4.csv")
+    dist = profile_distribution(ref, cur, "reference_data_tc4.csv")
+    pattern = profile_patterns(ref, cur, "reference_data_tc4.csv")
+
 
     summary = reason_overall_drift(
         [d.model_dump() for d in [column_drift] + dist + pattern],
-        "reference_data.csv"
+        "reference_data_tc4.csv"
     )
 
     generate_report(schema, column_drift, dist, pattern, summary, "drift_report.json")

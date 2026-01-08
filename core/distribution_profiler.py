@@ -19,6 +19,7 @@ Current statistics:
 {cur_stats}
 
 Determine if meaningful drift exists.
+Give me values for mean standard deviation for the columns with drift.
 Explain why.
 """)
 ])
